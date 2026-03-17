@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Newcastle · Alcohol Risk Intelligence</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<div id="app">
+
+  <header id="hdr">
+    <div id="logo">Newcastle <em>Alcohol Risk</em> Intelligence</div>
+    <div id="hdr-meta">Internal Licensing Tool</div>
+    <div id="hdr-badge">Synthetic Data</div>
+    <nav id="tabs">
+      <button class="tab active" data-view="overview">Overview</button>
+      <button class="tab" data-view="lookup">Postcode Lookup</button>
+      <button class="tab" data-view="checker">Application Checker</button>
+    </nav>
+  </header>
+
+  <div id="body">
+
+    <div id="map-col">
+      <div id="map-toolbar">
+        <button class="dim-btn active" data-dim="composite">Composite</button>
+        <button class="dim-btn" data-dim="imd">Deprivation</button>
+        <button class="dim-btn" data-dim="crime">Crime</button>
+        <button class="dim-btn" data-dim="density">Density</button>
+        <button class="dim-btn" data-dim="health">Health</button>
+        <div class="tb-sep"></div>
+        <button class="tog-btn" id="tog-prem">Premises</button>
+        <button class="tog-btn" id="tog-sch">Schools</button>
+        <div class="tb-sep"></div>
+        <button class="dim-btn" id="btn-reset">Reset</button>
+        <span id="zoom-hint">Scroll to zoom · Click LSOA for details</span>
+      </div>
+      <div id="map-wrap">
+        <div id="legend">
+          <div id="legend-title">Composite Risk</div>
+          <div class="leg-row"><div class="leg-swatch" style="background:#cf0144"></div>High (&gt;60%)</div>
+          <div class="leg-row"><div class="leg-swatch" style="background:#e3a008"></div>Medium (38–60%)</div>
+          <div class="leg-row"><div class="leg-swatch" style="background:#3fb950"></div>Low (&lt;38%)</div>
+          <div class="leg-row" id="leg-sch"  style="display:none"><div class="leg-dot" style="background:#3fb950"></div>School</div>
+          <div class="leg-row" id="leg-ring" style="display:none"><div class="leg-ring"></div>800m buffer</div>
+        </div>
+        <div id="tt"></div>
+      </div>
+    </div>
+
+    <div id="panel">
+
+      <!-- OVERVIEW -->
+      <div class="view active" id="view-overview">
+        <div class="ph">
+          <div class="ph-eye">City Overview</div>
+          <div class="ph-title">Risk Summary</div>
+          <div class="ph-sub" id="overview-sub">Loading…</div>
+        </div>
+        <div class="pb">
+          <div class="stat-grid" id="stat-grid"></div>
+          <!-- Flagged LSOAs appear here dynamically -->
+          <div id="flagged-section"></div>
+          <div class="sec">Wards ranked by composite risk ↓</div>
+          <div id="ward-list"></div>
+        </div>
+      </div>
+
+      <!-- POSTCODE LOOKUP -->
+      <div class="view" id="view-lookup">
+        <div class="ph">
+          <div class="ph-eye">Location Search</div>
+          <div class="ph-title">Postcode Lookup</div>
+          <div class="ph-sub">Enter a Newcastle postcode</div>
+        </div>
+        <div class="pb">
+          <div class="search-row">
+            <input class="search-in" id="pc-in" placeholder="e.g. NE4 6ST" maxlength="8" autocomplete="off">
+            <button class="search-btn" id="pc-btn">Find</button>
+          </div>
+          <div id="lookup-out"></div>
+        </div>
+      </div>
+
+      <!-- APPLICATION CHECKER -->
+      <div class="view" id="view-checker">
+        <div class="ph">
+          <div class="ph-eye">Licence Assessment</div>
+          <div class="ph-title">Application Checker</div>
+          <div class="ph-sub">Data composite + officer assessment → blended score</div>
+        </div>
+        <div class="pb">
+
+          <!-- Step 1: Location -->
+          <div class="step">
+            <div class="step-n">01</div>
+            <div class="step-t">Location</div>
+            <div class="field">
+              <label>Ward</label>
+              <select class="csel" id="ch-ward"><option value="">— Loading wards —</option></select>
+            </div>
+          </div>
+
+          <!-- Step 2: Trade type -->
+          <div class="step">
+            <div class="step-n">02</div>
+            <div class="step-t">Trade Type</div>
+            <div class="radios">
+              <label class="radio-opt"><input type="radio" name="trade" value="on"> On-trade (bar, pub, restaurant, nightclub)</label>
+              <label class="radio-opt"><input type="radio" name="trade" value="off"> Off-trade (off-licence, supermarket, shop)</label>
+            </div>
+          </div>
+
+          <!-- Step 3: Diversification -->
+          <div class="step">
+            <div class="step-n">03</div>
+            <div class="step-t">Diversification (optional)</div>
+            <div class="eco-note">Enforceable conditions for food or cultural programming reduce the composite score via the Economic Bonus offset.</div>
+            <label class="check-opt"><input type="checkbox" id="ch-food"> Food service condition (licence-attached) <em class="green">−8 pts</em></label>
+            <label class="check-opt"><input type="checkbox" id="ch-music"> Live music / cultural programme <em class="green">−6 pts</em></label>
+          </div>
+
+          <!-- Step 4: Officer assessment -->
+          <div class="step officer-step">
+            <div class="step-n">04</div>
+            <div class="step-t">Officer Assessment
+              <span class="step-badge">30% weight</span>
+            </div>
+            <div class="officer-note">
+              Score each factor 0–10. These are blended with the data composite at 30% weight.
+              Leave at 0 if unknown or not applicable.
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-label">
+                <span>Operator track record</span>
+                <span class="slider-val" id="o-track-val">0</span>
+              </div>
+              <input type="range" class="officer-slider" id="o-track" min="0" max="10" value="0">
+              <div class="slider-hint">Previous compliance, complaints, licence history</div>
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-label">
+                <span>Premises history</span>
+                <span class="slider-val" id="o-history-val">0</span>
+              </div>
+              <input type="range" class="officer-slider" id="o-history" min="0" max="10" value="0">
+              <div class="slider-hint">Prior incidents, reviews, or enforcement at this address</div>
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-label">
+                <span>Objections received</span>
+                <span class="slider-val" id="o-objections-val">0</span>
+              </div>
+              <input type="range" class="officer-slider" id="o-objections" min="0" max="10" value="0">
+              <div class="slider-hint">Volume and strength of representations from residents or responsible authorities</div>
+            </div>
+
+            <div class="slider-row">
+              <div class="slider-label">
+                <span>Management quality</span>
+                <span class="slider-val" id="o-management-val">0</span>
+              </div>
+              <input type="range" class="officer-slider" id="o-management" min="0" max="10" value="0">
+              <div class="slider-hint">DPS qualifications, operating schedule, proposed conditions</div>
+            </div>
+
+            <div id="blend-preview" class="blend-preview-label">Officer avg: 0%</div>
+          </div>
+
+          <button class="run-btn" id="ch-run">Generate Blended Risk Profile →</button>
+          <div class="checker-res" id="ch-res"></div>
+
+        </div>
+      </div>
+
+    </div><!-- /panel -->
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/static/js/map.js"></script>
+<script src="/static/js/panel.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
