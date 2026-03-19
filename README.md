@@ -64,10 +64,4 @@ weights and thresholds there independently of data loading.
 | `GET /api/postcode/<pc>` | LSOA match for postcode            |
 | `GET /api/check`       | Application checker result           |
 
-## Deploying to Render (free tier)
 
-1. Push to a GitHub repo
-2. New Web Service on render.com → connect repo
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `gunicorn app:app`
-5. Done — live URL in ~2 minutes
