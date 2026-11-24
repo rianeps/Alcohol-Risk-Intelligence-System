@@ -11,13 +11,14 @@
 <div id="app">
 
   <header id="hdr">
-    <div id="logo">Newcastle <em>Alcohol Risk</em> Intelligence</div>
-    <div id="hdr-meta">Internal Licensing Tool</div>
-    <div id="hdr-badge">Synthetic Data</div>
+    <div id="logo"><span class="brand-mark">AR</span><div>Alcohol Risk Intelligence<small>Newcastle upon Tyne · Decision support prototype</small></div></div>
+    
+    <div id="hdr-badge">Modelled on Synthetic Data</div>
     <nav id="tabs">
       <button class="tab active" data-view="overview">Overview</button>
       <button class="tab" data-view="lookup">Postcode Lookup</button>
       <button class="tab" data-view="checker">Application Checker</button>
+      <button class="tab" data-view="methodology">Methodology</button>
     </nav>
   </header>
 
@@ -35,15 +36,15 @@
         <button class="tog-btn" id="tog-sch">Schools</button>
         <div class="tb-sep"></div>
         <button class="dim-btn" id="btn-reset">Reset</button>
-        <span id="zoom-hint">Scroll to zoom · Click LSOA for details</span>
+        <span id="zoom-hint">Click an area for details</span>
       </div>
       <div id="map-wrap">
         <div id="legend">
           <div id="legend-title">Composite Risk</div>
-          <div class="leg-row"><div class="leg-swatch" style="background:#cf0144"></div>High (&gt;60%)</div>
-          <div class="leg-row"><div class="leg-swatch" style="background:#e3a008"></div>Medium (38–60%)</div>
-          <div class="leg-row"><div class="leg-swatch" style="background:#3fb950"></div>Low (&lt;38%)</div>
-          <div class="leg-row" id="leg-sch"  style="display:none"><div class="leg-dot" style="background:#3fb950"></div>School</div>
+          <div class="leg-row"><div class="leg-swatch" style="background:var(--red)"></div>High (≥60%)</div>
+          <div class="leg-row"><div class="leg-swatch" style="background:var(--yel)"></div>Medium (38–&lt;60%)</div>
+          <div class="leg-row"><div class="leg-swatch" style="background:var(--grn)"></div>Low (&lt;38%)</div>
+          <div class="leg-row" id="leg-sch"  style="display:none"><div class="leg-dot" style="background:var(--grn)"></div>School</div>
           <div class="leg-row" id="leg-ring" style="display:none"><div class="leg-ring"></div>800m buffer</div>
         </div>
         <div id="tt"></div>
@@ -77,7 +78,7 @@
         </div>
         <div class="pb">
           <div class="search-row">
-            <input class="search-in" id="pc-in" placeholder="e.g. NE4 6ST" maxlength="8" autocomplete="off">
+            <input aria-label="Newcastle postcode" class="search-in" id="pc-in" placeholder="e.g. NE4 6ST" maxlength="8" autocomplete="off">
             <button class="search-btn" id="pc-btn">Find</button>
           </div>
           <div id="lookup-out"></div>
@@ -98,7 +99,7 @@
             <div class="step-n">01</div>
             <div class="step-t">Location</div>
             <div class="field">
-              <label>Ward</label>
+              <label for="ch-ward">Ward</label>
               <select class="csel" id="ch-ward"><option value="">— Loading wards —</option></select>
             </div>
           </div>
@@ -138,7 +139,7 @@
                 <span>Operator track record</span>
                 <span class="slider-val" id="o-track-val">0</span>
               </div>
-              <input type="range" class="officer-slider" id="o-track" min="0" max="10" value="0">
+              <input aria-label="Operator track record" type="range" class="officer-slider" id="o-track" min="0" max="10" value="0">
               <div class="slider-hint">Previous compliance, complaints, licence history</div>
             </div>
 
@@ -147,7 +148,7 @@
                 <span>Premises history</span>
                 <span class="slider-val" id="o-history-val">0</span>
               </div>
-              <input type="range" class="officer-slider" id="o-history" min="0" max="10" value="0">
+              <input aria-label="Premises history" type="range" class="officer-slider" id="o-history" min="0" max="10" value="0">
               <div class="slider-hint">Prior incidents, reviews, or enforcement at this address</div>
             </div>
 
@@ -156,7 +157,7 @@
                 <span>Objections received</span>
                 <span class="slider-val" id="o-objections-val">0</span>
               </div>
-              <input type="range" class="officer-slider" id="o-objections" min="0" max="10" value="0">
+              <input aria-label="Objections received" type="range" class="officer-slider" id="o-objections" min="0" max="10" value="0">
               <div class="slider-hint">Volume and strength of representations from residents or responsible authorities</div>
             </div>
 
@@ -165,7 +166,7 @@
                 <span>Management quality</span>
                 <span class="slider-val" id="o-management-val">0</span>
               </div>
-              <input type="range" class="officer-slider" id="o-management" min="0" max="10" value="0">
+              <input aria-label="Management quality" type="range" class="officer-slider" id="o-management" min="0" max="10" value="0">
               <div class="slider-hint">DPS qualifications, operating schedule, proposed conditions</div>
             </div>
 
@@ -178,6 +179,7 @@
         </div>
       </div>
 
+      <div class="view" id="view-methodology"><div class="ph"><div class="ph-eye">About the model</div><div class="ph-title">Methodology</div><div class="ph-sub">How to interpret this academic prototype</div></div><div class="pb methodology"><div class="step"><h3>Risk dimensions</h3><p>The dashboard displays deprivation, crime and antisocial behaviour, outlet density and health outcomes, alongside a composite index.</p></div><div class="step"><h3>Application assessment</h3><p>The adjusted data composite contributes 70% of the blended index; the mean of four officer ratings contributes 30%. Optional diversification conditions affect the adjusted data score.</p><div class="formula">0.70 × data + 0.30 × officer</div><p>Checker tiers: low below 38%, medium from 38% to below 60%, high from 60%.</p></div><div class="step"><h3>Limitations</h3><p>This is a coursework prototype using synthetic risk data. Scores are indices, not probabilities of harm. They are not validated for real licensing decisions. Unknown officer ratings currently default to zero; this may understate risk.</p><p>Composite dimension weights and data provenance should be documented against the backend implementation before real-world use.</p></div></div></div>
     </div><!-- /panel -->
   </div><!-- /body -->
 </div><!-- /app -->
