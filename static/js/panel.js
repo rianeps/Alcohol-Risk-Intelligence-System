@@ -48,7 +48,7 @@ const PanelModule = (() => {
 
   function resultCard(props) {
     const t   = props.tier;
-    const col = t === 'high' ? '#cf0144' : t === 'medium' ? '#e3a008' : '#3fb950';
+    const col = t === 'high' ? 'var(--red)' : t === 'medium' ? 'var(--yel)' : 'var(--grn)';
     const isFlagged = flagged.has(props.lsoa_id);
     return `
       <div class="res-card ${t} fade">
@@ -67,8 +67,8 @@ const PanelModule = (() => {
         </div>
         <span class="tier-badge ${t}">${t.toUpperCase()} RISK AREA</span>
         <div class="score-rows">
-          ${scoreRow('Deprivation (IMD)', props.imd,       '#e3a008')}
-          ${scoreRow('Crime & ASB',       props.crime,     '#cf0144')}
+          ${scoreRow('Deprivation (IMD)', props.imd,       'var(--yel)')}
+          ${scoreRow('Crime & ASB',       props.crime,     'var(--red)')}
           ${scoreRow('Outlet Density',    props.density,   '#a31c4f')}
           ${scoreRow('Health Outcomes',   props.health,    '#388bfd')}
           ${scoreRow('Composite Score',   props.composite, col, true)}
@@ -130,11 +130,11 @@ const PanelModule = (() => {
 
     document.getElementById('ward-list').innerHTML = wards.map(w => {
       const t   = w.tier;
-      const col = t === 'high' ? '#cf0144' : t === 'medium' ? '#e3a008' : '#3fb950';
+      const col = t === 'high' ? 'var(--red)' : t === 'medium' ? 'var(--yel)' : 'var(--grn)';
       return `<div class="ward" data-ward="${w.ward_name}">
         <div class="ward-dot" style="background:${col}"></div>
         <div class="ward-name">${w.ward_name}</div>
-        <div class="ward-pct">${pct(w.avg_composite)}</div>
+        <div class="ward-meter"><div style="width:${pct(w.avg_composite)};background:${col}"></div></div><div class="ward-pct">${pct(w.avg_composite)}</div>
         <div class="tier-tag ${t}">${t}</div>
       </div>`;
     }).join('');
@@ -155,7 +155,7 @@ const PanelModule = (() => {
     el.innerHTML = `
       <div class="sec" style="color:var(--red)">⚑ Flagged for Review (${flagged.size})</div>
       ${[...flagged.values()].map(f => {
-        const col = f.composite >= 0.60 ? '#cf0144' : f.composite >= 0.38 ? '#e3a008' : '#3fb950';
+        const col = f.composite >= 0.60 ? 'var(--red)' : f.composite >= 0.38 ? 'var(--yel)' : 'var(--grn)';
         return `<div class="flagged-row" data-id="${f.lsoa_id}">
           <div class="flagged-info">
             <div class="flagged-id">${f.lsoa_id}</div>
@@ -283,8 +283,8 @@ const PanelModule = (() => {
           (data.composite_adjusted * 0.70 + officerAvg * 0.30).toFixed(3)
         );
         const blendedTier = blended >= 0.60 ? 'high' : blended >= 0.38 ? 'medium' : 'low';
-        const col  = blendedTier === 'high' ? '#cf0144' : blendedTier === 'medium' ? '#e3a008' : '#3fb950';
-        const colD = data.tier_adjusted === 'high' ? '#cf0144' : data.tier_adjusted === 'medium' ? '#e3a008' : '#3fb950';
+        const col  = blendedTier === 'high' ? 'var(--red)' : blendedTier === 'medium' ? 'var(--yel)' : 'var(--grn)';
+        const colD = data.tier_adjusted === 'high' ? 'var(--red)' : data.tier_adjusted === 'medium' ? 'var(--yel)' : 'var(--grn)';
 
         const ecoNote = data.eco_reduction > 0
           ? `<div class="flag-box ok">✓ Economic Bonus applied — composite reduced by ${pct(data.eco_reduction)}</div>`
@@ -303,7 +303,7 @@ const PanelModule = (() => {
               <div style="font-size:.65rem;color:var(--tx2);margin-top:2px">${data.lsoa_id} (highest-risk LSOA)</div>
             </div>
             <div style="text-align:right">
-              <div class="cr-score" style="color:${col}">${pct(blended)}</div>
+              <div class="cr-score" style="color:${col}">${pct(blended)}</div><span class="tier-tag ${blendedTier}">${blendedTier} risk</span>
               <div style="font-size:.58rem;color:var(--tx3)">blended score</div>
             </div>
           </div>
