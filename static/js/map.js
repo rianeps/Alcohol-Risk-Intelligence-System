@@ -54,21 +54,23 @@ const MapModule = (() => {
     });
 
     // CartoDB Dark Matter — no API key needed
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+}).addTo(map);
 
     // D3 SVG overlay
-    svgLayer = L.svg({ pane: 'overlayPane' }).addTo(map);
-    const svgEl = svgLayer._container;
-    svgEl.style.pointerEvents = 'auto';
-    g.style('pointer-events', 'auto');
+    // D3 SVG overlay
+svgLayer = L.svg({ pane: 'overlayPane' }).addTo(map);
+const svgEl = svgLayer._container;
+svgEl.style.pointerEvents = 'auto';
 
-    g = d3.select(svgEl).append('g').attr('class', 'leaflet-zoom-hide');
+g = d3.select(svgEl).append('g')
+    .attr('class', 'leaflet-zoom-hide');
 
-    buildLsoaLayer();
+g.style('pointer-events', 'auto');
+
+buildLsoaLayer();
 
     // Redraw D3 paths whenever Leaflet moves
     map.on('zoomend moveend', redrawPaths);
@@ -87,6 +89,7 @@ const MapModule = (() => {
         .attr('stroke',       '#080d14')
         .attr('stroke-width', 0.6)
         .style('cursor', 'pointer')
+        .style('pointer-events', 'all')
         .on('mouseover', handleOver)
         .on('mousemove', handleMove)
         .on('mouseout',  handleOut)
